@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth } from '@/context/AuthContext'
 import { apiCall } from '@/lib/api'
 import { toast } from 'sonner'
 import { Search, X, Eye, Download, FileText } from 'lucide-react'
@@ -37,7 +37,7 @@ export default function ApplicationsTab() {
         setIsLoading(true)
         try {
             // Fetch all applications (admin endpoint)
-            const data = await apiCall('/api/internal/applications', 'GET', null, token)
+            const data = await apiCall('/api/admin/applications', 'GET', null)
             setApplications(data || [])
         } catch (error) {
             toast.error('Failed to load applications')

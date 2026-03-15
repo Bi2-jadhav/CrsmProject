@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth } from '@/context/AuthContext'
 import { apiCall } from '@/lib/api'
 import { toast } from 'sonner'
 import { Briefcase, Users, CheckCircle, XCircle, Clock } from 'lucide-react'

@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth } from '@/context/AuthContext'
 import { apiCall } from '@/lib/api'
 import { toast } from 'sonner'
-import { CheckCircle, XCircle, Trash2 } from 'lucide-react'
+import { ShieldOff, ShieldCheck, Trash2 } from 'lucide-react'
 
 export default function CompaniesTab() {
   const [companies, setCompanies] = useState([])
@@ -21,7 +21,7 @@ export default function CompaniesTab() {
   const fetchCompanies = async () => {
     setIsLoading(true)
     try {
-      const data = await apiCall('/api/internal/companies', 'GET', null, token)
+      const data = await apiCall('/api/admin/companies', 'GET', null)
       setCompanies(data || [])
     } catch (error) {
       toast.error('Failed to load companies')
@@ -30,23 +30,23 @@ export default function CompaniesTab() {
     }
   }
 
-  const handleVerify = async (companyId) => {
+  const handleBlock = async (companyId) => {
     try {
-      await apiCall(`/api/internal/companies/${companyId}`, 'PUT', { verified: true }, token)
-      toast.success('Company verified!')
+      await apiCall(`/api/admin/companies/block/${companyId}`, 'PUT', null)
+      toast.success('Company blocked!')
       fetchCompanies()
     } catch (error) {
-      toast.error('Failed to verify company')
+      toast.error('Failed to block company')
     }
   }
 
-  const handleReject = async (companyId) => {
+  const handleUnblock = async (companyId) => {
     try {
-      await apiCall(`/api/internal/companies/${companyId}`, 'PUT', { verified: false }, token)
-      toast.success('Company rejected!')
+      await apiCall(`/api/admin/companies/unblock/${companyId}`, 'PUT', null)
+      toast.success('Company unblocked!')
       fetchCompanies()
     } catch (error) {
-      toast.error('Failed to reject company')
+      toast.error('Failed to unblock company')
     }
   }
 
@@ -54,7 +54,7 @@ export default function CompaniesTab() {
     if (!window.confirm('Are you sure you want to delete this company?')) return
 
     try {
-      await apiCall(`/api/internal/companies/${companyId}`, 'DELETE', null, token)
+      await apiCall(`/api/admin/companies/${companyId}`, 'DELETE', null)
       toast.success('Company deleted!')
       fetchCompanies()
     } catch (error) {
@@ -84,6 +84,9 @@ export default function CompaniesTab() {
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                  Location
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                   Status
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
@@ -95,34 +98,34 @@ export default function CompaniesTab() {
               {companies.map((company) => (
                 <tr key={company.id} className="border-b border-gray-200 hover:bg-gray-50">
                   <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                    {company.name}
+                    {company.companyName}
                   </td>
                   <td className="px-6 py-4 text-sm text-gray-600">{company.email}</td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{company.location || '—'}</td>
                   <td className="px-6 py-4 text-sm">
-                    <Badge className={company.verified ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
-                      {company.verified ? 'Verified' : 'Pending'}
+                    <Badge className={company.blocked ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}>
+                      {company.blocked ? 'Blocked' : 'Active'}
                     </Badge>
                   </td>
                   <td className="px-6 py-4 text-sm space-x-2">
-                    {!company.verified && (
-                      <>
-                        <Button
-                          onClick={() => handleVerify(company.id)}
-                          size="sm"
-                          className="bg-green-600 hover:bg-green-700 text-white"
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Verify
-                        </Button>
-                        <Button
-                          onClick={() => handleReject(company.id)}
-                          size="sm"
-                          className="bg-red-600 hover:bg-red-700 text-white"
-                        >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Reject
-                        </Button>
-                      </>
+                    {company.blocked ? (
+                      <Button
+                        onClick={() => handleUnblock(company.id)}
+                        size="sm"
+                        className="bg-green-600 hover:bg-green-700 text-white"
+                      >
+                        <ShieldCheck className="w-4 h-4 mr-1" />
+                        Unblock
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleBlock(company.id)}
+                        size="sm"
+                        className="bg-orange-600 hover:bg-orange-700 text-white"
+                      >
+                        <ShieldOff className="w-4 h-4 mr-1" />
+                        Block
+                      </Button>
                     )}
                     <Button
                       onClick={() => handleDeleteCompany(company.id)}

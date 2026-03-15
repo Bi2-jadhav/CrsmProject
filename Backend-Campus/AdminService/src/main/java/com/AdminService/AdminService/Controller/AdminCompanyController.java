@@ -1,6 +1,5 @@
 package com.AdminService.AdminService.Controller;
 
-
 import com.AdminService.AdminService.Dto.CompanyDTO;
 import com.AdminService.AdminService.Service.AdminCompanyService;
 import org.springframework.web.bind.annotation.*;
@@ -22,15 +21,21 @@ public class AdminCompanyController {
         return service.getAll();
     }
 
-    @PutMapping("/approve/{id}")
-    public String approve(@PathVariable Long id) {
-        service.approve(id);
-        return "Company approved";
-    }
-
     @PutMapping("/block/{id}")
     public String block(@PathVariable Long id) {
         service.block(id);
         return "Company blocked";
+    }
+
+    @PutMapping("/unblock/{id}")
+    public String unblock(@PathVariable Long id) {
+        service.unblock(id);
+        return "Company unblocked";
+    }
+
+    @DeleteMapping("/{id}")
+    public String delete(@PathVariable Long id) {
+        service.delete(id);
+        return "Company deleted";
     }
 }

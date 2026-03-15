@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react'
+import React from 'react'
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs'
 import UsersTab from '../components/admin/UsersTab'
 import CompaniesTab from '../components/admin/CompaniesTab'
@@ -8,8 +8,6 @@ import ApplicationsTab from '../components/admin/ApplicationsTab'
 import AdminJobsTab from '../components/admin/AdminJobsTab'
 
 export default function AdminDashboard() {
-  const [activeTab, setActiveTab] = useState('analytics')
-
   return (
     <div className="min-h-screen bg-gray-50 p-6">
       <div className="max-w-7xl mx-auto">
@@ -22,36 +20,26 @@ export default function AdminDashboard() {
 
         <Tabs defaultValue="analytics">
           <TabsList>
-            <TabsTrigger value="analytics" activeTab={activeTab} setActiveTab={setActiveTab}>
-              Analytics
-            </TabsTrigger>
-            <TabsTrigger value="applications" activeTab={activeTab} setActiveTab={setActiveTab}>
-              Applications
-            </TabsTrigger>
-            <TabsTrigger value="jobs" activeTab={activeTab} setActiveTab={setActiveTab}>
-              Jobs
-            </TabsTrigger>
-            <TabsTrigger value="users" activeTab={activeTab} setActiveTab={setActiveTab}>
-              Users
-            </TabsTrigger>
-            <TabsTrigger value="companies" activeTab={activeTab} setActiveTab={setActiveTab}>
-              Companies
-            </TabsTrigger>
+            <TabsTrigger value="analytics">Analytics</TabsTrigger>
+            <TabsTrigger value="applications">Applications</TabsTrigger>
+            <TabsTrigger value="jobs">Jobs</TabsTrigger>
+            <TabsTrigger value="users">Users</TabsTrigger>
+            <TabsTrigger value="companies">Companies</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="analytics" activeTab={activeTab}>
+          <TabsContent value="analytics">
             <AnalyticsTab />
           </TabsContent>
-          <TabsContent value="applications" activeTab={activeTab}>
+          <TabsContent value="applications">
             <ApplicationsTab />
           </TabsContent>
-          <TabsContent value="jobs" activeTab={activeTab}>
+          <TabsContent value="jobs">
             <AdminJobsTab />
           </TabsContent>
-          <TabsContent value="users" activeTab={activeTab}>
+          <TabsContent value="users">
             <UsersTab />
           </TabsContent>
-          <TabsContent value="companies" activeTab={activeTab}>
+          <TabsContent value="companies">
             <CompaniesTab />
           </TabsContent>
         </Tabs>

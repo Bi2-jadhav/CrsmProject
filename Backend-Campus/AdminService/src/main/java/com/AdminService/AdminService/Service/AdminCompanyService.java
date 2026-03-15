@@ -1,6 +1,5 @@
 package com.AdminService.AdminService.Service;
 
-
 import com.AdminService.AdminService.Client.CompanyClient;
 import com.AdminService.AdminService.Dto.CompanyDTO;
 import org.springframework.stereotype.Service;
@@ -20,12 +19,12 @@ public class AdminCompanyService {
         return companyClient.getAllCompanies();
     }
 
-    public void approve(Long id) {
-        companyClient.approve(id);
-    }
-
     public void block(Long id) {
         companyClient.block(id);
+    }
+
+    public void unblock(Long id) {
+        companyClient.unblock(id);
     }
 
     public void delete(Long id) {

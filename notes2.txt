@@ -1,0 +1,109 @@
+
+
+Dashboard Overview (Top Section)
+
+Add summary cards at the top:
+
+Total Jobs Posted
+
+Total Applicants
+
+Accepted Candidates
+
+Rejected Candidates
+
+Pending Applications
+
+💡 Example:
+
+[ 5 Jobs ]  [ 120 Applicants ]  [ 25 Accepted ]  [ 10 Rejected ]
+
+➡️ This gives quick insights to the company.
+
+2️⃣ Applicant Details View
+
+Right now you only show email.
+
+You should add:
+
+Student Name
+
+College
+
+Branch
+
+CGPA
+
+Resume (View / Download)
+
+Skills
+
+Applied Date
+
+💡 Add a “View Profile” button.
+
+3️⃣ Job Status Control
+
+For each job:
+
+🟢 Open
+
+🔴 Closed
+
+When job is closed:
+
+Students cannot apply
+
+Company cannot accept/reject new applications
+
+4️⃣ Search & Filter Applicants
+
+Add filters:
+
+By CGPA
+
+By Status (Applied / Accepted / Rejected)
+
+By Skills
+
+By College / Branch
+
+👉 Very important for real recruitment.
+
+GOOD-TO-HAVE FEATURES (Medium Priority)
+5️⃣ Selection Rounds Tracking
+
+Since you already have Number of Rounds, add:
+
+Round 1: Aptitude
+
+Round 2: Technical
+
+Round 3: HR
+
+Track:
+
+Current round per student
+
+Round-wise status
+
+6️⃣ Notifications
+
+Notify student when:
+
+Application accepted
+
+Application rejected
+
+Selected for next round
+
+(Even simple in-app notification is enough for now)
+
+7️⃣ Edit Job Option
+
+Currently you have delete only.
+
+Add:
+
+✏️ Edit Job
+(Change CTC, eligibility, rounds, skills)

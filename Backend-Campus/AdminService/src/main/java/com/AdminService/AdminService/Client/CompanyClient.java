@@ -12,11 +12,11 @@ public interface CompanyClient {
     @GetMapping("/api/internal/companies")
     List<CompanyDTO> getAllCompanies();
 
-    @PutMapping("/api/internal/companies/approve/{id}")
-    void approve(@PathVariable Long id);
-
     @PutMapping("/api/internal/companies/block/{id}")
     void block(@PathVariable Long id);
+
+    @PutMapping("/api/internal/companies/unblock/{id}")
+    void unblock(@PathVariable Long id);
 
     @DeleteMapping("/api/internal/companies/{id}")
     void delete(@PathVariable Long id);

@@ -4,7 +4,7 @@ import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
-import { useAuth } from '@/lib/auth-context'
+import { useAuth } from '@/context/AuthContext'
 import { apiCall } from '@/lib/api'
 import { toast } from 'sonner'
 import { Trash2, Search } from 'lucide-react'
@@ -22,7 +22,7 @@ export default function UsersTab() {
   const fetchUsers = async () => {
     setIsLoading(true)
     try {
-      const data = await apiCall('/api/internal/students', 'GET', null, token)
+      const data = await apiCall('/api/admin/students', 'GET', null)
       setUsers(data || [])
     } catch (error) {
       toast.error('Failed to load users')
@@ -35,7 +35,7 @@ export default function UsersTab() {
     if (!window.confirm('Are you sure you want to delete this user?')) return
 
     try {
-      await apiCall(`/api/internal/students/${userId}`, 'DELETE', null, token)
+      await apiCall(`/api/admin/students/${userId}`, 'DELETE', null)
       toast.success('User deleted successfully!')
       fetchUsers()
     } catch (error) {
@@ -47,15 +47,6 @@ export default function UsersTab() {
     user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchTerm.toLowerCase())
   )
-
-  const getRoleColor = (role) => {
-    const roleMap = {
-      STUDENT: 'bg-blue-100 text-blue-800',
-      COMPANY: 'bg-green-100 text-green-800',
-      ADMIN: 'bg-purple-100 text-purple-800',
-    }
-    return roleMap[role] || 'bg-gray-100 text-gray-800'
-  }
 
   return (
     <div className="space-y-6">
@@ -85,7 +76,10 @@ export default function UsersTab() {
                   Email
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
-                  Role
+                  Branch
+                </th>
+                <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
+                  CGPA
                 </th>
                 <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">
                   Actions
@@ -95,7 +89,7 @@ export default function UsersTab() {
             <tbody>
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan="4" className="px-6 py-8 text-center text-gray-600">
+                  <td colSpan="5" className="px-6 py-8 text-center text-gray-600">
                     No users found
                   </td>
                 </tr>
@@ -106,11 +100,8 @@ export default function UsersTab() {
                       {user.name}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
-                    <td className="px-6 py-4 text-sm">
-                      <Badge className={getRoleColor(user.role)}>
-                        {user.role}
-                      </Badge>
-                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{user.branch || '—'}</td>
+                    <td className="px-6 py-4 text-sm text-gray-600">{user.cgpa || '—'}</td>
                     <td className="px-6 py-4 text-sm">
                       <Button
                         onClick={() => handleDeleteUser(user.id)}
