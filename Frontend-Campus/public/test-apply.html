@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Job Application API</title>
+</head>
+<body>
+    <h1>Test Job Application</h1>
+    <button onclick="testApply()">Test Apply to Job</button>
+    <div id="result"></div>
+
+    <script>
+        async function testApply() {
+            const token = localStorage.getItem('token');
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                // Test data
+                const applicationData = {
+                    companyId: 1,
+                    companyName: "Test Company",
+                    packageOffered: 500000
+                };
+
+                const response = await fetch('http://localhost:8080/api/student/applications', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(applicationData)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML = `<pre style="color: green;">SUCCESS:\n${JSON.stringify(data, null, 2)}</pre>`;
+                } else {
+                    const error = await response.text();
+                    resultDiv.innerHTML = `<pre style="color: red;">ERROR ${response.status}:\n${error}</pre>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<pre style="color: red;">EXCEPTION:\n${error.message}</pre>`;
+            }
+        }
+    </script>
+</body>
+</html>

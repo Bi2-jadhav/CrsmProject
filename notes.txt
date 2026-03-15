@@ -1,0 +1,6 @@
+{
+  "name": "Renuka",
+  "email": "admin@crms.com",
+  "password": "admin123",
+  "role": "ADMIN"
+}
