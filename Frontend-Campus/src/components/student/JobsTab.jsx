@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
@@ -8,59 +9,77 @@ import { Briefcase, MapPin, DollarSign, Search } from 'lucide-react'
 
 export default function JobsTab() {
   const [jobs, setJobs] = useState([])
+  const [appliedJobs, setAppliedJobs] = useState([])
   const [searchTerm, setSearchTerm] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
   useEffect(() => {
     fetchJobs()
+    fetchApplications()
   }, [])
 
+  // ✅ Load jobs
   const fetchJobs = async () => {
     setIsLoading(true)
     try {
-      // ✅ Correct endpoint for listing jobs
       const data = await apiCall('/api/internal/jobs')
       setJobs(data || [])
-    } catch (error) {
+    } catch {
       toast.error('Failed to load jobs')
     } finally {
       setIsLoading(false)
     }
   }
 
-  const handleApply = async (job) => {
+  // ✅ Load applied jobs
+  const fetchApplications = async () => {
     try {
-      // Send JobApplication object with required fields
-      const applicationData = {
-        companyId: job.id,
-        companyName: job.companyName,
-        packageOffered: job.ctc
-      }
-      await apiCall('/api/student/applications', 'POST', applicationData)
-      toast.success('Applied to job successfully!')
-      // Optionally refresh jobs list to update UI
-      fetchJobs()
-    } catch (error) {
-      // Check for duplicate application error
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to apply for job'
-
-      if (errorMessage.includes('already applied')) {
-        toast.error('You have already applied to this company')
-      } else {
-        toast.error(errorMessage)
-      }
+      const data = await apiCall('/api/student/applications')
+      const jobIds = (data || []).map(app => app.jobId)
+      setAppliedJobs(jobIds)
+    } catch {
+      console.error('Failed to fetch applications')
     }
   }
 
+  // 🔥 FIXED APPLY FUNCTION
+  const handleApply = async (job) => {
+    try {
+      const user = JSON.parse(localStorage.getItem('user'))
 
-  // ✅ Correct filtering based on backend fields
-  const filteredJobs = jobs.filter((job) =>
+      const applicationData = {
+        studentId: user?.id,       // ✅ FIXED
+        jobId: job.id,             // ✅ REQUIRED
+        companyId: job.companyId, // ✅ REQUIRED
+        status: 'APPLIED'
+      }
+
+      await apiCall('/api/student/applications', 'POST', applicationData) 
+
+      toast.success('Applied successfully!')
+
+      // update UI instantly
+      setAppliedJobs(prev => [...prev, job.id])
+
+    } catch (error) {
+      const msg =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Failed to apply'
+
+      toast.error(msg)
+    }
+  }
+
+  // 🔍 Filter jobs
+  const filteredJobs = jobs.filter(job =>
     job.jobRole?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     job.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
     <div className="space-y-6">
+
       {/* SEARCH */}
       <div className="relative">
         <Search className="absolute left-3 top-3 w-5 h-5 text-gray-400" />
@@ -74,59 +93,75 @@ export default function JobsTab() {
 
       {isLoading ? (
         <Card className="p-8 text-center">
-          <p className="text-gray-600">Loading jobs...</p>
+          Loading jobs...
         </Card>
       ) : filteredJobs.length === 0 ? (
         <Card className="p-8 text-center">
-          <p className="text-gray-600">No jobs found</p>
+          No jobs found
         </Card>
       ) : (
         <div className="grid gap-4">
-          {filteredJobs.map((job) => (
-            <Card key={job.id} className="p-6 hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-4">
-                <div className="flex-1">
-                  {/* JOB ROLE */}
-                  <h3 className="text-xl font-semibold text-gray-900 mb-1">
-                    {job.jobRole}
-                  </h3>
+          {filteredJobs.map((job) => {
 
-                  {/* COMPANY NAME */}
-                  <p className="text-gray-600 mb-3">
-                    🏢 {job.companyName}
-                  </p>
+            const alreadyApplied = appliedJobs.includes(job.id)
 
-                  <div className="flex flex-wrap gap-4 text-sm text-gray-600">
-                    <div className="flex items-center space-x-1">
-                      <MapPin className="w-4 h-4" />
-                      <span>{job.location}</span>
+            return (
+              <Card key={job.id} className="p-6 hover:shadow-md">
+
+                <div className="flex justify-between items-start mb-4">
+                  <div className="flex-1">
+
+                    <h3 className="text-xl font-semibold">
+                      {job.jobRole}
+                    </h3>
+
+                    <p className="text-gray-600 mb-3">
+                      🏢 {job.companyName}
+                    </p>
+
+                    <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                      <div className="flex items-center gap-1">
+                        <MapPin className="w-4 h-4" />
+                        {job.location}
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <DollarSign className="w-4 h-4" />
+                        ₹{job.ctc}
+                      </div>
+
+                      <div className="flex items-center gap-1">
+                        <Briefcase className="w-4 h-4" />
+                        {job.skills}
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                      <DollarSign className="w-4 h-4" />
-                      <span>₹{job.ctc}</span>
-                    </div>
-                    <div className="flex items-center space-x-1">
-                      <Briefcase className="w-4 h-4" />
-                      <span>{job.skills}</span>
-                    </div>
+
+                    <p className="text-sm mt-2">
+                      <b>Eligibility:</b> {job.eligibility}
+                    </p>
                   </div>
 
-                  <p className="text-sm text-gray-700 mt-3">
-                    <strong>Eligibility:</strong> {job.eligibility}
-                  </p>
+                  {/* APPLY BUTTON */}
+                  <Button
+                    onClick={() => handleApply(job)}
+                    disabled={alreadyApplied}
+                    className={`ml-4 ${
+                      alreadyApplied
+                        ? 'bg-gray-400 cursor-not-allowed'
+                        : 'bg-blue-600 text-white'
+                    }`}
+                  >
+                    {alreadyApplied ? 'Applied' : 'Apply'}
+                  </Button>
+
                 </div>
 
-                <Button
-                  onClick={() => handleApply(job)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white ml-4"
-                >
-                  Apply
-                </Button>
-              </div>
-            </Card>
-          ))}
+              </Card>
+            )
+          })}
         </div>
       )}
     </div>
   )
 }
+

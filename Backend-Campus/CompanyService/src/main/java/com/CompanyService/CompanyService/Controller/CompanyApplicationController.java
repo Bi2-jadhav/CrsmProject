@@ -20,8 +20,10 @@ public class CompanyApplicationController {
 
     @GetMapping("/{jobId}")
     public List<JobApplicationDTO> applicants(@PathVariable Long jobId) {
+        System.out.println("DEBUG: CompanyService received request for applicants of Job ID: " + jobId);
         return service.getApplicants(jobId);
     }
+
 
     @PutMapping("/{applicationId}")
     public String updateStatus(@PathVariable Long applicationId,

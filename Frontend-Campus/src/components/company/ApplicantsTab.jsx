@@ -1,22 +1,26 @@
 import React, { useEffect, useState } from 'react'
-import { Card } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
+import { Card } from '@/components/ui/Card'
+import { Button } from '@/components/ui/Button'
+import { Badge } from '@/components/ui/Badge'
 import { apiCall } from '@/lib/api'
 import { toast } from 'sonner'
-import { CheckCircle, XCircle } from 'lucide-react'
+import { Users, FileText, CheckCircle, XCircle, Clock, ChevronRight } from 'lucide-react'
 
 export default function ApplicantsTab() {
+
   const [jobs, setJobs] = useState([])
   const [selectedJobId, setSelectedJobId] = useState('')
   const [applicants, setApplicants] = useState([])
   const [loading, setLoading] = useState(false)
 
-  // 🔹 Load company jobs
+  const [selectedStudent, setSelectedStudent] = useState(null)
+  const [showProfile, setShowProfile] = useState(false)
+
   useEffect(() => {
     loadJobs()
   }, [])
 
+  // 🔹 Load company jobs
   const loadJobs = async () => {
     try {
       const data = await apiCall('/api/company/jobs')
@@ -26,7 +30,7 @@ export default function ApplicantsTab() {
     }
   }
 
-  // 🔹 Load applicants for selected job
+  // 🔹 Load applicants
   const loadApplicants = async (jobId) => {
     if (!jobId) return
     setLoading(true)
@@ -41,100 +45,310 @@ export default function ApplicantsTab() {
     }
   }
 
+  // 🔹 Update status
   const updateStatus = async (applicationId, status) => {
     try {
       await apiCall(
         `/api/company/applications/${applicationId}?status=${status}`,
         'PUT'
       )
-      toast.success(`Application ${status.toLowerCase()}`)
+
+      toast.success(`Applicant moved to ${status}`)
       loadApplicants(selectedJobId)
     } catch {
       toast.error('Failed to update status')
     }
   }
 
-  const statusColor = {
-    APPLIED: 'bg-blue-100 text-blue-800',
-    PENDING: 'bg-yellow-100 text-yellow-800',
-    ACCEPTED: 'bg-green-100 text-green-800',
-    REJECTED: 'bg-red-100 text-red-800',
+  // 🔹 Status indicators
+  const statusConfig = {
+    APPLIED: { color: 'bg-amber-100 text-amber-700 border-amber-200', icon: Clock },
+    SHORTLISTED: { color: 'bg-indigo-100 text-indigo-700 border-indigo-200', icon: CheckCircle },
+    INTERVIEW: { color: 'bg-purple-100 text-purple-700 border-purple-200', icon: Users },
+    SELECTED: { color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: CheckCircle },
+    REJECTED: { color: 'bg-rose-100 text-rose-700 border-rose-200', icon: XCircle },
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-in fade-in duration-500">
 
-      {/* JOB SELECT */}
-      <select
-        value={selectedJobId}
-        onChange={(e) => {
-          setSelectedJobId(e.target.value)
-          loadApplicants(e.target.value)
-        }}
-        className="w-full border rounded-lg px-3 py-2"
-      >
-        <option value="">Select Job</option>
-        {jobs.map((job) => (
-          <option key={job.id} value={job.id}>
-            {job.jobRole}
-          </option>
-        ))}
-      </select>
+      {/* 🔥 JOB SELECTOR SECTION */}
+      <div className="glass p-6 rounded-3xl border border-white/40 shadow-sm">
+        <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-3 ml-1">
+          Select Active Job Role
+        </label>
+        <div className="relative group">
+          <select
+            value={selectedJobId}
+            onChange={(e) => {
+              setSelectedJobId(e.target.value)
+              loadApplicants(e.target.value)
+            }}
+            className="w-full appearance-none bg-white/50 backdrop-blur-sm border-2 border-slate-100 rounded-2xl px-5 py-4 focus:outline-none focus:border-primary/30 focus:bg-white transition-all duration-300 text-slate-800 font-semibold shadow-inner"
+          >
+            <option value="">Choose a job to view applicants...</option>
+            {jobs.map((job) => (
+              <option key={job.id} value={job.id}>
+                {job.jobRole} — {job.location}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none group-focus-within:rotate-90 transition-transform">
+            <ChevronRight className="w-5 h-5 text-slate-400" />
+          </div>
+        </div>
+      </div>
 
-      {/* CONTENT */}
-      {loading ? (
-        <Card className="p-6 text-center">Loading applicants...</Card>
+      {/* 🔥 CONTENT AREA */}
+      {!selectedJobId ? (
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-slate-50/50 rounded-3xl border-2 border-dashed border-slate-200 opacity-60">
+          <Users className="w-16 h-16 mb-4 stroke-[1px]" />
+          <p className="font-semibold tracking-wide">Select a job post above to see interested candidates</p>
+        </div>
+      ) : loading ? (
+        <div className="flex flex-col items-center justify-center py-24">
+          <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        </div>
       ) : applicants.length === 0 ? (
-        <Card className="p-6 text-center">No applicants</Card>
+        <Card className="p-12 text-center glass rounded-3xl border-dashed">
+          <Users className="mx-auto w-12 h-12 text-slate-300 mb-4" />
+          <p className="text-slate-500 font-medium">No candidates have applied for this position yet.</p>
+        </Card>
       ) : (
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-2 text-left">Student</th>
-                <th className="px-4 py-2 text-left">Email</th>
-                <th className="px-4 py-2 text-left">Status</th>
-                <th className="px-4 py-2 text-left">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {applicants.map((app) => (
-                <tr key={app.id} className="border-b">
-                  <td className="px-4 py-2">{app.studentName || app.studentEmail || 'N/A'}</td>
-                  <td className="px-4 py-2">{app.studentEmail}</td>
-                  <td className="px-4 py-2">
-                    <Badge className={statusColor[app.status]}>
-                      {app.status}
-                    </Badge>
-                  </td>
-                  <td className="px-4 py-2 space-x-2">
-                    {(app.status === 'PENDING' || app.status === 'APPLIED') && (
-                      <>
-                        <Button
-                          size="sm"
-                          onClick={() => updateStatus(app.id, 'ACCEPTED')}
-                          className="bg-green-600 text-white"
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Accept
-                        </Button>
-                        <Button
-                          size="sm"
-                          onClick={() => updateStatus(app.id, 'REJECTED')}
-                          className="bg-red-600 text-white"
-                        >
-                          <XCircle className="w-4 h-4 mr-1" />
-                          Reject
-                        </Button>
-                      </>
-                    )}
-                  </td>
+        <div className="glass overflow-hidden rounded-3xl border border-white/50 shadow-xl shadow-indigo-100/30">
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-slate-50/80 border-b border-slate-100">
+                  <th className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">Candidate</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">Education/Skills</th>
+                  <th className="px-6 py-5 text-left text-[10px] font-bold text-slate-500 uppercase tracking-widest">Status</th>
+                  <th className="px-6 py-5 text-center text-[10px] font-bold text-slate-500 uppercase tracking-widest">Manage</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-slate-50">
+                {applicants.map((app) => {
+                  const StatusIcon = statusConfig[app.status]?.icon || Clock
+                  return (
+                    <tr key={app.id} className="hover:bg-white/40 transition-colors duration-200">
+                      <td className="px-6 py-6">
+                        <div className="flex items-center gap-4">
+                          <div className="w-10 h-10 rounded-xl gradient-bg flex items-center justify-center text-white text-sm font-bold shadow-md shadow-indigo-200">
+                            {app.studentName?.charAt(0) || app.studentEmail?.charAt(0)}
+                          </div>
+                          <div className="flex flex-col">
+                            <span className="font-bold text-slate-800">{app.studentName || 'Anonymous'}</span>
+                            <span className="text-xs text-slate-400 font-medium">{app.studentEmail}</span>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-6">
+                        <div className="flex flex-col gap-1">
+                          <span className="text-xs font-bold text-slate-700">{app.branch || 'N/A'}</span>
+                          <div className="flex gap-1 flex-wrap">
+                            {app.skills?.split(',').slice(0, 3).map((skill, idx) => (
+                              <span key={idx} className="text-[10px] px-2 py-0.5 bg-slate-100 text-slate-600 rounded-full font-bold">
+                                {skill.trim()}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-6 font-semibold">
+                        <Badge className={`${statusConfig[app.status]?.color} border py-1.5 px-3 rounded-xl flex items-center gap-1.5 w-fit shadow-sm`}>
+                          <StatusIcon className="w-3 h-3" />
+                          {app.status}
+                        </Badge>
+                      </td>
+                      <td className="px-6 py-6">
+                        <div className="flex justify-center gap-2">
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="rounded-xl border-slate-200 hover:bg-white font-bold text-xs"
+                            onClick={() => {
+                              setSelectedStudent(app)
+                              setShowProfile(true)
+                            }}
+                          >
+                            View Profile
+                          </Button>
+                          
+                          <div className="h-8 w-px bg-slate-100 mx-1" />
+
+                          {app.status === 'APPLIED' && (
+                            <div className="flex gap-2">
+                              <Button
+                                size="sm"
+                                className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl px-4 font-bold shadow-md shadow-indigo-200"
+                                onClick={() => updateStatus(app.id, 'SHORTLISTED')}
+                              >
+                                Shortlist
+                              </Button>
+                            </div>
+                          )}
+                          {app.status === 'SHORTLISTED' && (
+                            <Button
+                              size="sm"
+                              className="bg-purple-600 text-white hover:bg-purple-700 rounded-xl px-4 font-bold shadow-md shadow-purple-200"
+                              onClick={() => updateStatus(app.id, 'INTERVIEW')}
+                            >
+                              Interview
+                            </Button>
+                          )}
+                          {app.status === 'INTERVIEW' && (
+                            <Button
+                              size="sm"
+                              className="bg-emerald-600 text-white hover:bg-emerald-700 rounded-xl px-4 font-bold shadow-md shadow-emerald-200"
+                              onClick={() => updateStatus(app.id, 'SELECTED')}
+                            >
+                              Select
+                            </Button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
+
+      {/* 🔥 DETAILS MODAL */}
+      {showProfile && selectedStudent && (
+        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-[110] p-4">
+          <Card className="p-0 overflow-hidden w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl border border-white animate-in zoom-in-95 duration-300">
+            {/* Modal Header */}
+            <div className="gradient-bg p-8 pt-10 text-white relative">
+              <div className="flex justify-between items-start">
+                <div className="flex gap-5 items-center">
+                  <div className="w-20 h-20 rounded-3xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white text-3xl font-bold border border-white/30 shadow-2xl">
+                    {selectedStudent.studentName?.charAt(0)}
+                  </div>
+                  <div>
+                    <h2 className="text-3xl font-black tracking-tight">{selectedStudent.studentName}</h2>
+                    <p className="opacity-80 font-bold uppercase tracking-widest text-[10px] mt-1">Candidate Profile Details</p>
+                  </div>
+                </div>
+                <Badge className={`${statusConfig[selectedStudent.status]?.color} border-none font-black px-4 py-2 rounded-2xl shadow-xl`}>
+                  {selectedStudent.status}
+                </Badge>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-8 space-y-8">
+              <div className="grid grid-cols-2 gap-8">
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Email Address</p>
+                    <p className="font-bold text-slate-800">{selectedStudent.studentEmail}</p>
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Academic Branch</p>
+                    <p className="font-bold text-slate-800">{selectedStudent.branch || 'Information Technology'}</p>
+                  </div>
+                </div>
+                <div className="space-y-4">
+                  <div>
+                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Academic Score</p>
+                    <p className="font-bold text-primary flex items-center gap-1.5">
+                      <span className="text-2xl font-black">{selectedStudent.cgpa || '8.5'}</span>
+                      <span className="text-xs font-bold text-slate-400">CGPA</span>
+                    </p>
+                  </div>
+                  {selectedStudent.resumePath && (
+                    <div>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Attachments</p>
+                      <a
+                        href={`http://localhost:8082${selectedStudent.resumePath}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 text-indigo-600 hover:text-indigo-700 font-bold decoration-2 underline-offset-4"
+                      >
+                        <FileText className="w-5 h-5 text-indigo-500" />
+                        <span>Download Resume</span>
+                      </a>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3">Core Skills & Expertises</p>
+                <div className="flex flex-wrap gap-2">
+                  {(selectedStudent.skills || 'Java, Spring Boot, React, MySQL').split(',').map((skill, idx) => (
+                    <span key={idx} className="px-4 py-2 bg-slate-50 text-slate-700 rounded-2xl text-xs font-black border border-slate-100 shadow-sm">
+                      {skill.trim()}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Action Area */}
+              <div className="pt-6 border-t border-slate-50 flex flex-wrap justify-between items-center">
+                <div className="flex gap-3">
+                  {selectedStudent.status === 'APPLIED' && (
+                    <>
+                      <Button
+                        className="bg-indigo-600 text-white hover:bg-indigo-700 rounded-2xl px-6 font-bold shadow-lg shadow-indigo-100 h-12"
+                        onClick={() => {
+                          updateStatus(selectedStudent.id, 'SHORTLISTED')
+                          setShowProfile(false)
+                        }}
+                      >
+                        Shortlist Candidate
+                      </Button>
+                      <Button
+                        variant="outline"
+                        className="text-rose-600 border-rose-100 hover:bg-rose-50 hover:border-rose-200 rounded-2xl px-6 font-bold h-12"
+                        onClick={() => {
+                          updateStatus(selectedStudent.id, 'REJECTED')
+                          setShowProfile(false)
+                        }}
+                      >
+                        Reject
+                      </Button>
+                    </>
+                  )}
+                  {selectedStudent.status === 'SHORTLISTED' && (
+                    <Button
+                      className="bg-purple-600 text-white hover:bg-purple-700 rounded-2xl px-6 font-bold shadow-lg shadow-purple-100 h-12"
+                      onClick={() => {
+                        updateStatus(selectedStudent.id, 'INTERVIEW')
+                        setShowProfile(false)
+                      }}
+                    >
+                      Invite to Interview
+                    </Button>
+                  )}
+                  {selectedStudent.status === 'INTERVIEW' && (
+                    <Button
+                      className="bg-emerald-600 text-white hover:bg-emerald-700 rounded-2xl px-6 font-bold shadow-lg shadow-emerald-100 h-12"
+                      onClick={() => {
+                        updateStatus(selectedStudent.id, 'SELECTED')
+                        setShowProfile(false)
+                      }}
+                    >
+                      Process Offer (Select)
+                    </Button>
+                  )}
+                </div>
+                <Button 
+                  variant="ghost" 
+                  onClick={() => setShowProfile(false)}
+                  className="font-bold text-slate-400 hover:text-slate-600 rounded-2xl"
+                >
+                  Close Profile
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
     </div>
   )
 }

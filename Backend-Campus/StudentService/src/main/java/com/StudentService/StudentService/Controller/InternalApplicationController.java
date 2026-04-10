@@ -1,5 +1,6 @@
 package com.StudentService.StudentService.Controller;
 
+import com.StudentService.StudentService.Dto.JobApplicationDTO;
 import com.StudentService.StudentService.Dto.UpdateStatusRequest;
 import com.StudentService.StudentService.Entity.JobApplication;
 import com.StudentService.StudentService.Service.ApplicationService;
@@ -19,7 +20,7 @@ public class InternalApplicationController {
 
     // Company views applicants for a job
     @GetMapping("/company/{companyId}")
-    public List<JobApplication> getApplicants(@PathVariable Long companyId) {
+    public List<JobApplicationDTO> getApplicants(@PathVariable Long companyId) {
         return service.getApplicantsByCompany(companyId);
     }
 

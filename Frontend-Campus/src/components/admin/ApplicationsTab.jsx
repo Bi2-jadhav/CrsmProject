@@ -207,7 +207,7 @@ export default function ApplicationsTab() {
                                     <td className="px-4 py-3">
                                         {app.resumePath ? (
                                             <a
-                                                href={`http://localhost:8082${app.resumePath}`}
+                                                href={`http://localhost:8080${app.resumePath}`}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
                                                 className="inline-flex items-center gap-1 text-blue-600 hover:text-blue-800 text-xs"

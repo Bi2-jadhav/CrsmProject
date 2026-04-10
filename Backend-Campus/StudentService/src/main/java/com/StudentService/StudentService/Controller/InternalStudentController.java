@@ -20,6 +20,11 @@ public class InternalStudentController {
         return service.getAll();
     }
 
+    @GetMapping("/{id}")
+    public Object getById(@PathVariable Long id) {
+        return service.getById(id);
+    }
+
     @GetMapping("/count")
     public long getCount() {
         return service.getCount();

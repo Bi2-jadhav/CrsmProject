@@ -11,9 +11,15 @@ public interface JobApplicationRepository extends JpaRepository<JobApplication, 
 
     List<JobApplication> findByCompanyId(Long companyId);
 
-    // Check if student already applied to this company
-    boolean existsByStudentEmailAndCompanyId(String studentEmail, Long companyId);
+    // ✅ NEW: filter by status
+    List<JobApplication> findByStudentEmailAndStatus(String email, String status);
 
-    // Count by status for dashboard stats
+    // ✅ Prevent duplicate apply per job
+    boolean existsByStudentEmailAndCompanyIdAndJobId(
+            String studentEmail,
+            Long companyId,
+            Long jobId
+    );
+
     long countByStatus(String status);
 }

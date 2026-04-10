@@ -4,6 +4,12 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@Table(
+        name = "job_application",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"studentEmail", "companyId", "jobId"}
+        )
+)
 public class JobApplication {
 
     @Id
@@ -11,16 +17,21 @@ public class JobApplication {
     private Long id;
 
     private String studentEmail;
+    private Long studentId;
     private Long companyId;
     private String companyName;
     private Double packageOffered;
     private Long jobId;
     private String jobRole;
     private LocalDate appliedDate;
-
     private String status; // APPLIED / ACCEPTED / REJECTED
+    private String resumePath; // 🔐 Added for sync
 
     // getters & setters
+
+    public String getResumePath() { return resumePath; }
+    public void setResumePath(String resumePath) { this.resumePath = resumePath; }
+
 
     public Long getId() {
         return id;
@@ -36,6 +47,14 @@ public class JobApplication {
 
     public void setStudentEmail(String studentEmail) {
         this.studentEmail = studentEmail;
+    }
+
+    public Long getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(Long studentId) {
+        this.studentId = studentId;
     }
 
     public Long getCompanyId() {

@@ -20,14 +20,16 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers("/api/internal/**").permitAll()
-                        .requestMatchers("/api/student/**")
-                        .hasRole("STUDENT")
-                        .anyRequest()
-                        .authenticated()
+                        .requestMatchers("/api/student/resume", "/api/student/resume/**").hasAnyRole("STUDENT", "COMPANY", "ADMIN")
+                        .requestMatchers("/api/student/**").hasRole("STUDENT")
+
+                        .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
+
 }

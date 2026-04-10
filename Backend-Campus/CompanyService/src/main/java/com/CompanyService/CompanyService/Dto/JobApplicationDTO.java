@@ -5,6 +5,12 @@ public class JobApplicationDTO {
     private Long id;
     private String studentEmail;
     private String studentName;
+
+    private String branch;
+    private Double cgpa;
+    private String skills;
+    private String resumePath;
+
     private String status;
 
     // Getters and Setters
@@ -31,6 +37,38 @@ public class JobApplicationDTO {
 
     public void setStudentName(String studentName) {
         this.studentName = studentName;
+    }
+
+    public String getBranch() {
+        return branch;
+    }
+
+    public void setBranch(String branch) {
+        this.branch = branch;
+    }
+
+    public Double getCgpa() {
+        return cgpa;
+    }
+
+    public void setCgpa(Double cgpa) {
+        this.cgpa = cgpa;
+    }
+
+    public String getSkills() {
+        return skills;
+    }
+
+    public void setSkills(String skills) {
+        this.skills = skills;
+    }
+
+    public String getResumePath() {
+        return resumePath;
+    }
+
+    public void setResumePath(String resumePath) {
+        this.resumePath = resumePath;
     }
 
     public String getStatus() {

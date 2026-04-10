@@ -1,18 +1,11 @@
 package com.StudentService.StudentService.Service;
 
-
-
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 
 @Service
 public class ResumeService {
@@ -22,13 +15,22 @@ public class ResumeService {
 
     public String upload(MultipartFile file, String email) throws IOException {
 
-        Path dirPath = Paths.get(uploadDir);
-        Files.createDirectories(dirPath);
+        // ✅ Create directory if not exists
+        File directory = new File(uploadDir);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
 
-        Path filePath = dirPath.resolve(email + ".pdf");
-        file.transferTo(filePath.toFile());
+        // ✅ Make filename safe
+        String safeEmail = email.replace("@", "_").replace(".", "_");
 
-        return "resumes/" + email + ".pdf";
+        // ✅ Full file path (CORRECT)
+        String filePath = uploadDir + File.separator + safeEmail + ".pdf";
+
+        // ✅ Save file
+        file.transferTo(new File(filePath));
+
+        // ✅ Return URL (used by frontend)
+        return "/uploads/resumes/" + safeEmail + ".pdf";
     }
 }
-

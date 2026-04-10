@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CompilerConfiguration">
+    <annotationProcessing>
+      <profile default="true" name="Default" enabled="true" />
+      <profile name="Maven default annotation processors profile" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <module name="ApiGatewayService" />
+        <module name="ServiceRegistryService" />
+      </profile>
+      <profile name="Annotation profile for interview-Service" enabled="true">
+        <sourceOutputDir name="target/generated-sources/annotations" />
+        <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
+        <outputRelativeToContentRoot value="true" />
+        <processorPath useClasspath="false">
+          <entry name="$MAVEN_REPOSITORY$/org/projectlombok/lombok/unknown/lombok-unknown.jar" />
+        </processorPath>
+        <module name="interview-Service" />
+        <module name="StudentService" />
+        <module name="application-service" />
+        <module name="CompanyService" />
+        <module name="AdminService" />
+        <module name="authService" />
+      </profile>
+    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="CompanyService (1)" target="17" />
+      <module name="Interview-Service" target="17" />
+    </bytecodeTargetLevel>
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="AdminService" options="-parameters" />
+      <module name="ApiGatewayService" options="-parameters" />
+      <module name="CompanyService" options="-parameters" />
+      <module name="CompanyService (1)" options="-parameters" />
+      <module name="Interview-Service" options="-parameters" />
+      <module name="ServiceRegistryService" options="-parameters" />
+      <module name="StudentService" options="-parameters" />
+      <module name="application-service" options="-parameters" />
+      <module name="authService" options="-parameters" />
+      <module name="interview-Service" options="-parameters" />
+    </option>
+  </component>
+</project>

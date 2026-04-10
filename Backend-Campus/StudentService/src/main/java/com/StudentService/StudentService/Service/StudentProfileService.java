@@ -11,6 +11,7 @@ public class StudentProfileService {
 
     private final StudentProfileRepository repository;
 
+    // ✅ Correct constructor
     public StudentProfileService(StudentProfileRepository repository) {
         this.repository = repository;
     }
@@ -20,11 +21,11 @@ public class StudentProfileService {
     // =====================
 
     public StudentProfile getByEmail(String email) {
-        return repository.findAll()
-                .stream()
-                .filter(s -> s.getEmail().equals(email))
-                .findFirst()
-                .orElse(null);
+        return repository.findByEmail(email).orElse(null);
+    }
+
+    public StudentProfile getById(Long id) {
+        return repository.findById(id).orElse(null);
     }
 
     public StudentProfile save(StudentProfile profile) {
@@ -35,12 +36,10 @@ public class StudentProfileService {
     // ADMIN METHODS
     // =====================
 
-    // ✅ Admin: view all students
     public List<StudentProfile> getAll() {
         return repository.findAll();
     }
 
-    // ✅ Admin: block student
     public void block(Long id) {
         StudentProfile student = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Student not found"));
@@ -49,12 +48,10 @@ public class StudentProfileService {
         repository.save(student);
     }
 
-    // ✅ Admin: count all students
     public long getCount() {
         return repository.count();
     }
 
-    // ✅ Admin: delete student
     public void delete(Long id) {
         repository.deleteById(id);
     }

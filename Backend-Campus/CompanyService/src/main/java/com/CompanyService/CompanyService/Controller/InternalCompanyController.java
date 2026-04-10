@@ -1,7 +1,7 @@
 package com.CompanyService.CompanyService.Controller;
 
-import com.CompanyService.CompanyService.Entity.CompanyProfile;
-import com.CompanyService.CompanyService.Repository.CompanyProfileRepository;
+import com.CompanyService.CompanyService.Dto.CompanyDTO;
+import com.CompanyService.CompanyService.Service.CompanyService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -10,41 +10,36 @@ import java.util.List;
 @RequestMapping("/api/internal/companies")
 public class InternalCompanyController {
 
-    private final CompanyProfileRepository repo;
+    private final CompanyService service;
 
-    public InternalCompanyController(CompanyProfileRepository repo) {
-        this.repo = repo;
+    public InternalCompanyController(CompanyService service) {
+        this.service = service;
     }
 
+    // ✅ ALL COMPANIES (FIXED)
     @GetMapping
-    public List<CompanyProfile> getAll() {
-        return repo.findAll()
-                .stream()
-                .filter(c -> !c.isBlocked())
-                .toList();
+    public List<CompanyDTO> getAll() {
+        return service.getAllCompanies();
+    }
+
+    // ✅ COUNT (FIXED)
+    @GetMapping("/count")
+    public long getCount() {
+        return service.getCompanyCount();
     }
 
     @PutMapping("/block/{id}")
     public void block(@PathVariable Long id) {
-        CompanyProfile c = repo.findById(id).orElseThrow();
-        c.setBlocked(true);
-        repo.save(c);
+        service.block(id);
     }
 
     @PutMapping("/unblock/{id}")
     public void unblock(@PathVariable Long id) {
-        CompanyProfile c = repo.findById(id).orElseThrow();
-        c.setBlocked(false);
-        repo.save(c);
-    }
-
-    @GetMapping("/count")
-    public long getCount() {
-        return repo.count();
+        service.unblock(id);
     }
 
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
-        repo.deleteById(id);
+        service.delete(id);
     }
 }

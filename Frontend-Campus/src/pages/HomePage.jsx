@@ -8,18 +8,6 @@ export default function HomePage() {
   const { isAuthenticated, user, authReady } = useAuth()
   const navigate = useNavigate()
 
-  // Redirect only if user is already logged in
-  // COMMENTED OUT: Removed automatic redirect to allow users to view homepage
-  // React.useEffect(() => {
-  //   if (!authReady) return
-
-  //   if (isAuthenticated) {
-  //     if (user?.role === 'STUDENT') navigate('/dashboard/student')
-  //     else if (user?.role === 'COMPANY') navigate('/dashboard/company')
-  //     else if (user?.role === 'ADMIN') navigate('/dashboard/admin')
-  //   }
-  // }, [authReady, isAuthenticated, user, navigate])
-
   if (!authReady) return null
 
   return (

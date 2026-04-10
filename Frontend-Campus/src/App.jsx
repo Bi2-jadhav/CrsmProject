@@ -27,7 +27,6 @@ function App() {
               path="/dashboard/student"
               element={
                 <ProtectedRoute allowedRoles={['STUDENT']}>
-                  <Navbar />
                   <StudentDashboard />
                 </ProtectedRoute>
               }
@@ -36,7 +35,6 @@ function App() {
               path="/dashboard/company"
               element={
                 <ProtectedRoute allowedRoles={['COMPANY']}>
-                  <Navbar />
                   <CompanyDashboard />
                 </ProtectedRoute>
               }
@@ -45,11 +43,11 @@ function App() {
               path="/dashboard/admin"
               element={
                 <ProtectedRoute allowedRoles={['ADMIN']}>
-                  <Navbar />
                   <AdminDashboard />
                 </ProtectedRoute>
               }
             />
+
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route path="*" element={<Navigate to="/" />} />
           </Routes>

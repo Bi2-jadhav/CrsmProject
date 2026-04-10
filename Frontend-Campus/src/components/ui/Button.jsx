@@ -1,18 +1,19 @@
 import React from 'react'
 
 export function Button({ children, variant = 'default', size = 'md', className = '', ...props }) {
-  const baseStyles = 'font-semibold rounded-lg transition-colors inline-flex items-center justify-center gap-2'
+  const baseStyles = 'font-bold rounded-xl transition-all duration-300 inline-flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 disabled:pointer-events-none'
   
   const variants = {
-    default: 'bg-blue-600 hover:bg-blue-700 text-white',
-    outline: 'border border-gray-300 text-gray-700 hover:bg-gray-50',
-    ghost: 'hover:bg-gray-100 text-gray-900',
+    default: 'gradient-bg text-white shadow-lg shadow-primary/25 hover:shadow-indigo-200/50 hover:-translate-y-0.5',
+    outline: 'border-2 border-slate-200 text-slate-700 bg-white/50 hover:border-primary/30 hover:text-primary hover:bg-white hover:shadow-md hover:-translate-y-0.5',
+    ghost: 'hover:bg-slate-100/80 text-slate-600 hover:text-slate-900',
+    danger: 'bg-rose-500 hover:bg-rose-600 text-white shadow-lg shadow-rose-100',
   }
 
   const sizes = {
-    sm: 'px-3 py-1.5 text-sm',
-    md: 'px-4 py-2 text-base',
-    lg: 'px-6 py-3 text-lg',
+    sm: 'px-4 py-2 text-xs uppercase tracking-wider',
+    md: 'px-6 py-2.5 text-sm',
+    lg: 'px-8 py-3.5 text-base',
   }
 
   return (
@@ -24,3 +25,4 @@ export function Button({ children, variant = 'default', size = 'md', className =
     </button>
   )
 }
+

@@ -107,3 +107,33 @@ Add:
 
 ✏️ Edit Job
 (Change CTC, eligibility, rounds, skills)
+
+
+
+
+
+
+
+
+
+
+
+28 / 03/2026
+student can apply once per job
+Implemented Apply button disable logic to prevent multiple applications for the same job.
+Developed status-based filtering functionality (APPLIED, SHORTLISTED, SELECTED, REJECTED).
+
+29/ 03/ 2026 
+admin profile :  Implemented Proper Company Fetch Logic   users + company_profile → CompanyDTO    Identified mismatch between: users table (3 companies) and company_profile table (1 company)
+company profile :  interview status is added 
+
+
+
+
+Failed to load resource: the server responded with a status of 503 (Service Unavailable)Understand this error student:1 Access to XMLHttpRequest at 'http://localhost:8080/api/applications' from origin 'http://localhost:3000' has been blocked by CORS policy: The 'Access-Control-Allow-Origin' header contains multiple values 'http://localhost:3000, *', but only one is allowed.Understand this error :8080/api/applications:1 Failed to load resource: net::ERR_FAILEDUnderstand this error student:1 Access to XMLHttpRequest at 'http://localhost:8080/api/applications' from origin 'http://localhost:3000' has been blocked by CORS policy: The 'Access-Control-Allow-Origin' header contains multiple values 'http://localhost:3000, *', but only one is allowed.Understand this error :8080/api/applications:1 Failed to load resource: net::ERR_FAILED
+
+
+
+in student dashboard when i click on apply button it is giving this error and and not applied 
+in company dashboard when i click on applicants tab and select any role then the applied student is not showing 
+and give me the look like left side panel 

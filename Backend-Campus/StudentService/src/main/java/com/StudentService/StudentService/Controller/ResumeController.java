@@ -28,14 +28,12 @@ public class ResumeController {
     public String upload(@RequestParam("file") MultipartFile file,
                          Principal principal) throws Exception {
 
-        System.out.println("Received file: " + file.getOriginalFilename());
-
         String path = resumeService.upload(file, principal.getName());
 
         var profile = profileService.getByEmail(principal.getName());
         profile.setResumePath(path);
         profileService.save(profile);
 
-        return "Resume uploaded successfully";
+        return "Resume uploaded successfully: " + path;
     }
 }
