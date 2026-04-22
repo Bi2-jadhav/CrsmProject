@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/Button'
 import { Badge } from '@/components/ui/Badge'
 import { apiCall } from '@/lib/api'
 import { toast } from 'sonner'
-import { Users, FileText, CheckCircle, XCircle, Clock, ChevronRight } from 'lucide-react'
+import { Users, FileText, CheckCircle, XCircle, Clock, ChevronRight, Video, MapPin, Calendar, X } from 'lucide-react'
 
 export default function ApplicantsTab() {
 
@@ -15,6 +15,20 @@ export default function ApplicantsTab() {
 
   const [selectedStudent, setSelectedStudent] = useState(null)
   const [showProfile, setShowProfile] = useState(false)
+
+  // 🔥 Interview scheduling state
+  const [showInterviewForm, setShowInterviewForm] = useState(false)
+  const [interviewTarget, setInterviewTarget] = useState(null)
+  const [interviewSubmitting, setInterviewSubmitting] = useState(false)
+  const [interviewForm, setInterviewForm] = useState({
+    interviewType: 'Technical',
+    mode: 'Online',
+    interviewDateTime: '',
+    interviewerName: '',
+    meetingLink: '',
+    location: '',
+    address: '',
+  })
 
   useEffect(() => {
     loadJobs()
@@ -59,6 +73,99 @@ export default function ApplicantsTab() {
       toast.error('Failed to update status')
     }
   }
+
+  // 🔥 Open interview scheduling form
+  const openInterviewForm = (applicant) => {
+    setInterviewTarget(applicant)
+    setInterviewForm({
+      interviewType: 'Technical',
+      mode: 'Online',
+      interviewDateTime: '',
+      interviewerName: '',
+      meetingLink: '',
+      location: '',
+      address: '',
+    })
+    setShowInterviewForm(true)
+  }
+
+  // 🔥 Submit interview schedule
+  const submitInterview = async () => {
+
+  // 🔥 VALIDATIONS
+  if (!interviewForm.interviewDateTime) {
+    toast.error('Please select date and time')
+    return
+  }
+
+  if (!interviewForm.interviewerName.trim()) {
+    toast.error('Please enter interviewer name')
+    return
+  }
+
+  if (interviewForm.mode === 'Online' && !interviewForm.meetingLink.trim()) {
+    toast.error('Please enter meeting link for online interview')
+    return
+  }
+
+  if (interviewForm.mode === 'Offline' && !interviewForm.location.trim()) {
+    toast.error('Please enter location for offline interview')
+    return
+  }
+
+  // 🔥 CRITICAL FIX: Ensure studentId exists
+  if (!interviewTarget?.studentId) {
+    console.error("❌ studentId missing:", interviewTarget)
+    toast.error("Candidate ID is missing ❌")
+    return
+  }
+
+  setInterviewSubmitting(true)
+
+  try {
+    const user = JSON.parse(localStorage.getItem('user'))
+    const selectedJob = jobs.find(j => String(j.id) === String(selectedJobId))
+
+    console.log("✅ INTERVIEW TARGET:", interviewTarget)
+
+    const payload = {
+      candidateId: interviewTarget.studentId,   // ✅ FIXED (NO fallback)
+      companyId: user?.id,
+      jobId: selectedJob?.id,
+      jobRole: selectedJob?.jobRole || 'N/A',
+      interviewType: interviewForm.interviewType,
+      mode: interviewForm.mode,
+      interviewDateTime: interviewForm.interviewDateTime,
+      interviewerName: interviewForm.interviewerName,
+      meetingLink: interviewForm.mode === 'Online' ? interviewForm.meetingLink : null,
+      location: interviewForm.mode === 'Offline' ? interviewForm.location : null,
+      address: interviewForm.mode === 'Offline' ? interviewForm.address : null,
+    }
+
+    console.log("🚀 PAYLOAD:", payload)
+
+    // 🔥 API CALL
+    await apiCall('/api/interviews/schedule', 'POST', payload)
+
+    // 🔥 UPDATE STATUS
+    await apiCall(
+      `/api/company/applications/${interviewTarget.id}?status=INTERVIEW`,
+      'PUT'
+    )
+
+    toast.success('Interview scheduled successfully!')
+
+    setShowInterviewForm(false)
+    setShowProfile(false)
+    loadApplicants(selectedJobId)
+
+  } catch (err) {
+    console.error("❌ ERROR:", err)
+    toast.error(err.message || 'Failed to schedule interview')
+  } finally {
+    setInterviewSubmitting(false)
+  }
+}
 
   // 🔹 Status indicators
   const statusConfig = {
@@ -191,7 +298,7 @@ export default function ApplicantsTab() {
                             <Button
                               size="sm"
                               className="bg-purple-600 text-white hover:bg-purple-700 rounded-xl px-4 font-bold shadow-md shadow-purple-200"
-                              onClick={() => updateStatus(app.id, 'INTERVIEW')}
+                              onClick={() => openInterviewForm(app)}
                             >
                               Interview
                             </Button>
@@ -317,8 +424,8 @@ export default function ApplicantsTab() {
                     <Button
                       className="bg-purple-600 text-white hover:bg-purple-700 rounded-2xl px-6 font-bold shadow-lg shadow-purple-100 h-12"
                       onClick={() => {
-                        updateStatus(selectedStudent.id, 'INTERVIEW')
                         setShowProfile(false)
+                        openInterviewForm(selectedStudent)
                       }}
                     >
                       Invite to Interview
@@ -344,6 +451,187 @@ export default function ApplicantsTab() {
                   Close Profile
                 </Button>
               </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* 🔥 INTERVIEW SCHEDULING MODAL */}
+      {showInterviewForm && interviewTarget && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-md flex items-center justify-center z-[120] p-4">
+          <Card className="p-0 overflow-hidden w-full max-w-xl bg-white rounded-[2.5rem] shadow-2xl border border-white animate-in zoom-in-95 duration-300">
+
+            {/* Header */}
+            <div className="bg-gradient-to-r from-purple-600 via-indigo-600 to-blue-600 p-7 text-white relative">
+              <button 
+                onClick={() => setShowInterviewForm(false)} 
+                className="absolute top-5 right-5 w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center">
+                  <Calendar className="w-7 h-7" />
+                </div>
+                <div>
+                  <h2 className="text-2xl font-black tracking-tight">Schedule Interview</h2>
+                  <p className="opacity-80 text-sm font-semibold mt-0.5">
+                    {interviewTarget.studentName || interviewTarget.studentEmail}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Form Body */}
+            <div className="p-7 space-y-5 max-h-[60vh] overflow-y-auto">
+
+              {/* Interview Type */}
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                  Interview Type
+                </label>
+                <select
+                  value={interviewForm.interviewType}
+                  onChange={(e) => setInterviewForm({...interviewForm, interviewType: e.target.value})}
+                  className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-purple-300 transition-colors bg-slate-50/50"
+                >
+                  <option value="Technical">Technical Round</option>
+                  <option value="HR">HR Round</option>
+                  <option value="Final">Final Round</option>
+                  <option value="Coding">Coding Assessment</option>
+                </select>
+              </div>
+
+              {/* Mode Selection */}
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                  Interview Mode
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setInterviewForm({...interviewForm, mode: 'Online'})}
+                    className={`flex items-center justify-center gap-3 p-4 rounded-2xl border-2 font-bold transition-all duration-200 ${
+                      interviewForm.mode === 'Online'
+                        ? 'border-purple-400 bg-purple-50 text-purple-700 shadow-lg shadow-purple-100'
+                        : 'border-slate-100 bg-slate-50/50 text-slate-500 hover:border-slate-200'
+                    }`}
+                  >
+                    <Video className="w-5 h-5" />
+                    Online
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setInterviewForm({...interviewForm, mode: 'Offline'})}
+                    className={`flex items-center justify-center gap-3 p-4 rounded-2xl border-2 font-bold transition-all duration-200 ${
+                      interviewForm.mode === 'Offline'
+                        ? 'border-purple-400 bg-purple-50 text-purple-700 shadow-lg shadow-purple-100'
+                        : 'border-slate-100 bg-slate-50/50 text-slate-500 hover:border-slate-200'
+                    }`}
+                  >
+                    <MapPin className="w-5 h-5" />
+                    Offline
+                  </button>
+                </div>
+              </div>
+
+              {/* Date & Time */}
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                  Date & Time
+                </label>
+                <input
+                  type="datetime-local"
+                  value={interviewForm.interviewDateTime}
+                  onChange={(e) => setInterviewForm({...interviewForm, interviewDateTime: e.target.value})}
+                  className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-purple-300 transition-colors bg-slate-50/50"
+                />
+              </div>
+
+              {/* Interviewer Name */}
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                  Interviewer Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="Enter interviewer name..."
+                  value={interviewForm.interviewerName}
+                  onChange={(e) => setInterviewForm({...interviewForm, interviewerName: e.target.value})}
+                  className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-purple-300 transition-colors bg-slate-50/50 placeholder:text-slate-300"
+                />
+              </div>
+
+              {/* Conditional: Online → Meeting Link */}
+              {interviewForm.mode === 'Online' && (
+                <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                  <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                    Meeting Link
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://meet.google.com/xyz or zoom link..."
+                    value={interviewForm.meetingLink}
+                    onChange={(e) => setInterviewForm({...interviewForm, meetingLink: e.target.value})}
+                    className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-purple-300 transition-colors bg-slate-50/50 placeholder:text-slate-300"
+                  />
+                </div>
+              )}
+
+              {/* Conditional: Offline → Location + Address */}
+              {interviewForm.mode === 'Offline' && (
+                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                      Venue / Location
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="e.g. Conference Room B, TCS Office"
+                      value={interviewForm.location}
+                      onChange={(e) => setInterviewForm({...interviewForm, location: e.target.value})}
+                      className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-purple-300 transition-colors bg-slate-50/50 placeholder:text-slate-300"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
+                      Full Address
+                    </label>
+                    <textarea
+                      placeholder="Complete address with city, pin code..."
+                      value={interviewForm.address}
+                      onChange={(e) => setInterviewForm({...interviewForm, address: e.target.value})}
+                      rows={2}
+                      className="w-full border-2 border-slate-100 rounded-2xl px-4 py-3 font-semibold text-slate-700 focus:outline-none focus:border-purple-300 transition-colors bg-slate-50/50 placeholder:text-slate-300 resize-none"
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Footer Actions */}
+            <div className="px-7 pb-7 pt-2 flex gap-3">
+              <Button
+                onClick={submitInterview}
+                disabled={interviewSubmitting}
+                className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 text-white hover:from-purple-700 hover:to-indigo-700 rounded-2xl h-13 font-black text-sm shadow-xl shadow-purple-200 disabled:opacity-50"
+              >
+                {interviewSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    Scheduling...
+                  </span>
+                ) : (
+                  'Schedule Interview'
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowInterviewForm(false)}
+                className="rounded-2xl px-6 font-bold text-slate-400 border-slate-100 hover:text-slate-600"
+              >
+                Cancel
+              </Button>
             </div>
           </Card>
         </div>

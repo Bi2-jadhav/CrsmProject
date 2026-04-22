@@ -49,8 +49,11 @@ export default function JobsTab() {
 
       const applicationData = {
         studentId: user?.id,       // ✅ FIXED
+        studentEmail: user?.email, // ✅ Added for robustness
         jobId: job.id,             // ✅ REQUIRED
-        companyId: job.companyId, // ✅ REQUIRED
+        jobRole: job.jobRole,      // 🔥 ADDED for history
+        companyId: job.companyId,  // ✅ REQUIRED
+        companyName: job.companyName, // 🔥 ADDED for history
         status: 'APPLIED'
       }
 

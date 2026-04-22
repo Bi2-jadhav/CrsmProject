@@ -3,86 +3,118 @@ import axios from "axios"
 const API_BASE_URL = "http://localhost:8080"
 
 const api = axios.create({
-  baseURL: API_BASE_URL
+baseURL: API_BASE_URL,
+withCredentials: false, // 🔥 important for microservices
 })
 
-// ✅ Attach token properly
+// ✅ REQUEST INTERCEPTOR (Attach token safely)
 api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem("token")
+(config) => {
+const token = localStorage.getItem("token")
 
-    // ❗ Do NOT attach token for login/register
-    if (token && !config.url?.includes("/api/auth")) {
-      config.headers.Authorization = `Bearer ${token}`
-    }
 
-    return config
-  },
-  (error) => Promise.reject(error)
+// ❗ Skip auth endpoints
+if (token && !config.url?.includes("/api/auth")) {
+  config.headers.Authorization = `Bearer ${token}`
+}
+
+// 🔥 Debug (very useful)
+console.log("➡️ API Request:", config.method?.toUpperCase(), config.url)
+
+return config
+
+
+},
+(error) => Promise.reject(error)
 )
 
-// ✅ Handle errors safely (FIXED)
+// ✅ RESPONSE INTERCEPTOR (Better handling)
 api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    const status = error.response?.status
-    const requestUrl = error.config?.url || ""
+(response) => {
+console.log("✅ API Response:", response.config.url)
+return response
+},
+(error) => {
+const status = error.response?.status
+const requestUrl = error.config?.url || ""
 
-    // ✅ ONLY logout if token exists AND it's NOT first request
-    if (status === 401) {
-      const token = localStorage.getItem("token")
 
-      console.log("🚨 401 ERROR FROM:", requestUrl)
+console.error("❌ API ERROR:", status, requestUrl)
 
-      // ❗ VERY IMPORTANT: Ignore first-time API failures
-      if (token && !requestUrl.includes("/api/auth")) {
-        console.warn("Token might be invalid, but not forcing logout immediately")
+// 🔥 Handle unauthorized
+if (status === 401) {
+  const token = localStorage.getItem("token")
 
-        // 🔥 TEMP FIX: DO NOT REMOVE TOKEN IMMEDIATELY
-        // localStorage.removeItem("token")
-        // window.location.replace("/login")
-      }
-    }
+  // Avoid logout loops
+  if (token && !requestUrl.includes("/api/auth")) {
+    console.warn("⚠️ Token expired or invalid")
 
-    return Promise.reject(error)
-  }
-)
-
-// ✅ Common API call
-export const apiCall = async (url, method = 'GET', body = null) => {
-  try {
-    const response = await api({
-      url,
-      method,
-      data: body
-    })
-    return response.data
-  } catch (error) {
-    console.error("API ERROR:", error.response?.data || error.message)
-
-    throw new Error(
-      error.response?.data?.message ||
-      error.response?.data ||
-      "API error"
-    )
+    // OPTIONAL (enable later)
+    // localStorage.removeItem("token")
+    // localStorage.removeItem("user")
+    // window.location.replace("/login")
   }
 }
 
-// ✅ File upload (already good, just cleaned)
+// 🔥 Handle forbidden (your 403 case)
+if (status === 403) {
+  console.warn("⛔ Access forbidden:", requestUrl)
+}
+
+return Promise.reject(error)
+
+}
+)
+
+// ✅ COMMON API CALL
+export const apiCall = async (url, method = "GET", body = null) => {
+try {
+const response = await api({
+url,
+method,
+data: body,
+})
+
+
+return response.data
+
+
+} catch (error) {
+const message =
+error.response?.data?.message ||
+error.response?.data ||
+error.message ||
+"API error"
+
+
+console.error("🚨 API CALL FAILED:", message)
+
+throw new Error(message)
+
+
+}
+}
+
+// ✅ FILE UPLOAD
 export const uploadFile = async (endpoint, file) => {
-  const formData = new FormData()
-  formData.append("file", file)
+const formData = new FormData()
+formData.append("file", file)
 
-  const token = localStorage.getItem("token")
+try {
+const response = await api.post(endpoint, formData, {
+headers: {
+"Content-Type": "multipart/form-data",
+},
+})
 
-  const response = await api.post(endpoint, formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-      Authorization: `Bearer ${token}`
-    }
-  })
 
-  return response.data
+return response.data
+
+
+} catch (error) {
+console.error("🚨 File upload failed:", error)
+throw error
+}
 }
 
 export default api

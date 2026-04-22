@@ -23,7 +23,11 @@ public class SecurityConfig {
                         // ✅ internal microservice calls
                         .requestMatchers("/api/internal/**").permitAll()
 
-                        // ✅ FIX: correct endpoint
+                        // ✅ Students can view their own interviews
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/interviews/candidate/**")
+                            .hasAnyRole("STUDENT", "COMPANY", "ADMIN")
+
+                        // ✅ Company/Admin can schedule and manage interviews
                         .requestMatchers("/api/interviews/**").hasAnyRole("COMPANY", "ADMIN")
 
                         .anyRequest().authenticated()

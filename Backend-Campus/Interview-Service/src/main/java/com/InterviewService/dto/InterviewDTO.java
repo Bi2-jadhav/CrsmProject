@@ -7,11 +7,15 @@ public class InterviewDTO {
 
     private Long candidateId;
     private Long companyId;
+    private Long jobId;
+    private String candidateEmail;  // 🔥 used for reliable interview lookup
     private String jobRole;
     private String interviewType;
     private String mode;
     private LocalDateTime interviewDateTime;
     private String meetingLink;
+    private String location;
+    private String address;
     private String interviewerName;
 
     public Long getCandidateId() {
@@ -20,6 +24,14 @@ public class InterviewDTO {
 
     public Long getCompanyId() {
         return companyId;
+    }
+
+    public Long getJobId() {
+        return jobId;
+    }
+
+    public String getCandidateEmail() {
+        return candidateEmail;
     }
 
     public String getJobRole() {
@@ -40,6 +52,14 @@ public class InterviewDTO {
 
     public String getMeetingLink() {
         return meetingLink;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public String getAddress() {
+        return address;
     }
 
     public String getInterviewerName() {

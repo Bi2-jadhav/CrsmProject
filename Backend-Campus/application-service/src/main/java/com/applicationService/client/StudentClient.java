@@ -9,4 +9,8 @@ public interface StudentClient {
 
     @GetMapping("/api/internal/students/{id}")
     StudentDTO getStudent(@PathVariable Long id);
+
+    // ✅ FIXED URL (singular "student")
+    @GetMapping("/api/internal/student/email/{email}")
+    StudentDTO getStudentByEmail(@PathVariable String email);
 }

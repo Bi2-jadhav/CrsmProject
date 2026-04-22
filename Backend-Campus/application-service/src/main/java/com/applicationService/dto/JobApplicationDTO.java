@@ -4,6 +4,7 @@ package com.applicationService.dto;
 public class JobApplicationDTO {
 
     private Long id;
+    private Long studentId;   // 🔥 student_profile.id — used for interview candidateId
 
     private String studentEmail;
     private String studentName;
@@ -23,6 +24,14 @@ public class JobApplicationDTO {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Long getStudentId() {
+        return studentId;
+    }
+
+    public void setStudentId(Long studentId) {
+        this.studentId = studentId;
     }
 
     public String getStudentEmail() {

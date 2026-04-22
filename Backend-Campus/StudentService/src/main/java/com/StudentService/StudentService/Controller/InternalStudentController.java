@@ -1,5 +1,7 @@
 package com.StudentService.StudentService.Controller;
 
+import com.StudentService.StudentService.Dto.StudentDTO;
+import com.StudentService.StudentService.Entity.StudentProfile;
 import com.StudentService.StudentService.Service.StudentProfileService;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,10 +23,23 @@ public class InternalStudentController {
     }
 
     @GetMapping("/{id}")
-    public Object getById(@PathVariable Long id) {
-        return service.getById(id);
-    }
+    public StudentDTO getById(@PathVariable Long id) {
 
+        StudentProfile student = service.getById(id);
+
+        if (student == null) return null;
+
+        StudentDTO dto = new StudentDTO();
+        dto.setId(student.getId());
+        dto.setName(student.getName());
+        dto.setEmail(student.getEmail());
+        dto.setBranch(student.getBranch());
+        dto.setCgpa(student.getCgpa());
+        dto.setSkills(student.getSkills());
+        dto.setResumePath(student.getResumePath());
+
+        return dto;
+    }
     @GetMapping("/count")
     public long getCount() {
         return service.getCount();

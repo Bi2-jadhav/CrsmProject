@@ -1,4 +1,5 @@
-package com.CompanyService.CompanyService.Service;
+
+        package com.CompanyService.CompanyService.Service;
 
 import com.CompanyService.CompanyService.Dto.CompanyDTO;
 import com.CompanyService.CompanyService.Entity.CompanyProfile;
@@ -25,7 +26,7 @@ public class CompanyService {
         return userRepository.findByRole("COMPANY").size();
     }
 
-    // ✅ MAIN FIX
+    // ✅ FIXED: Always ensure profile exists
     public List<CompanyDTO> getAllCompanies() {
 
         List<UserEntity> companies = userRepository.findByRole("COMPANY");
@@ -35,43 +36,60 @@ public class CompanyService {
             CompanyProfile profile =
                     companyProfileRepository.findByEmail(user.getEmail());
 
+            // 🔥 AUTO-CREATE PROFILE IF NOT EXISTS
+            if (profile == null) {
+                profile = new CompanyProfile();
+                profile.setEmail(user.getEmail());
+                profile.setCompanyName(user.getName());
+                profile.setLocation("N/A");
+                profile = companyProfileRepository.save(profile);
+            }
+
             CompanyDTO dto = new CompanyDTO();
-            dto.setId(user.getId());
+            dto.setId(user.getId()); // keep user id
             dto.setEmail(user.getEmail());
-
-            dto.setCompanyName(
-                    profile != null ? profile.getCompanyName() : user.getName()
-            );
-
-            dto.setLocation(
-                    profile != null ? profile.getLocation() : "N/A"
-            );
-
-            dto.setBlocked(
-                    profile != null && profile.isBlocked()
-            );
+            dto.setCompanyName(profile.getCompanyName());
+            dto.setLocation(profile.getLocation());
+            dto.setBlocked(profile.isBlocked());
 
             return dto;
 
         }).toList();
     }
 
-    // ✅ BLOCK
-    public void block(Long id) {
-        CompanyProfile c = companyProfileRepository.findById(id).orElseThrow();
-        c.setBlocked(true);
-        companyProfileRepository.save(c);
+    // 🔥 FIXED: use EMAIL instead of ID
+    public void block(Long userId) {
+        UserEntity user = userRepository.findById(userId).orElseThrow();
+
+        CompanyProfile profile =
+                companyProfileRepository.findByEmail(user.getEmail());
+
+        if (profile != null) {
+            profile.setBlocked(true);
+            companyProfileRepository.save(profile);
+        }
     }
 
-    // ✅ UNBLOCK
-    public void unblock(Long id) {
-        CompanyProfile c = companyProfileRepository.findById(id).orElseThrow();
-        c.setBlocked(false);
-        companyProfileRepository.save(c);
+    public void unblock(Long userId) {
+        UserEntity user = userRepository.findById(userId).orElseThrow();
+
+        CompanyProfile profile =
+                companyProfileRepository.findByEmail(user.getEmail());
+
+        if (profile != null) {
+            profile.setBlocked(false);
+            companyProfileRepository.save(profile);
+        }
     }
 
-    // ✅ DELETE
-    public void delete(Long id) {
-        companyProfileRepository.deleteById(id);
+    public void delete(Long userId) {
+        UserEntity user = userRepository.findById(userId).orElseThrow();
+
+        CompanyProfile profile =
+                companyProfileRepository.findByEmail(user.getEmail());
+
+        if (profile != null) {
+            companyProfileRepository.delete(profile);
+        }
     }
 }

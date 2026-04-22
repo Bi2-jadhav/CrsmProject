@@ -1,9 +1,10 @@
-package com.CompanyService.CompanyService.Security;
 
+        package com.CompanyService.CompanyService.Security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy; // 🔥 ADD THIS
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -13,12 +14,20 @@ public class SecurityConfig {
     private final JwtFilter jwtFilter;
 
     public SecurityConfig(JwtFilter jwtFilter) {
+
         this.jwtFilter = jwtFilter;
     }
 
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.csrf(csrf -> csrf.disable())
+        http
+                .csrf(csrf -> csrf.disable())
+
+                // 🔥 CRITICAL FIX
+                .sessionManagement(session ->
+                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                )
+
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/internal/**").permitAll()
                         .requestMatchers("/api/company/**").hasRole("COMPANY")
@@ -30,3 +39,4 @@ public class SecurityConfig {
         return http.build();
     }
 }
+

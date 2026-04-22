@@ -31,6 +31,15 @@ public class StudentProfileController {
 
     @GetMapping
     public StudentProfile getProfile(Principal principal) {
-        return service.getByEmail(principal.getName());
+        StudentProfile profile = service.getByEmail(principal.getName());
+        // 🔥 AUTO-CREATE if missing (fallback for existing users)
+        if (profile == null) {
+            profile = new StudentProfile();
+            profile.setEmail(principal.getName());
+            profile.setName(principal.getName().split("@")[0]);
+            profile = service.save(profile);
+            System.out.println("🆕 Auto-created student profile for: " + principal.getName());
+        }
+        return profile;
     }
 }

@@ -58,6 +58,32 @@ export function AuthProvider({ children }) {
         role: decoded.role?.replace('ROLE_', '').toUpperCase(),
       }
 
+      // ✅ Fetch profile ID for STUDENT and COMPANY (needed for interview/application lookups)
+      try {
+        const roleNormalized = userData.role
+        if (roleNormalized === 'STUDENT') {
+          const profileRes = await fetch('http://localhost:8080/api/student/profile', {
+            headers: { Authorization: `Bearer ${data.token}` }
+          })
+          if (profileRes.ok) {
+            const profile = await profileRes.json()
+            userData.id = profile.id
+            userData.name = profile.name
+          }
+        } else if (roleNormalized === 'COMPANY') {
+          const profileRes = await fetch('http://localhost:8080/api/company/profile', {
+            headers: { Authorization: `Bearer ${data.token}` }
+          })
+          if (profileRes.ok) {
+            const profile = await profileRes.json()
+            userData.id = profile.id
+            userData.name = profile.companyName
+          }
+        }
+      } catch (profileError) {
+        console.warn('Could not fetch profile ID:', profileError)
+      }
+
       // ✅ Save to state
       setToken(data.token)
       setUser(userData)

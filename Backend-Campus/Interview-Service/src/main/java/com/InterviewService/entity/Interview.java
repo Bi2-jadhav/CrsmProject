@@ -18,6 +18,8 @@ public class Interview {
 
     private Long candidateId;
     private Long companyId;
+    private Long jobId;
+    private String candidateEmail;  // 🔥 Primary lookup key (reliable, never changes)
 
     private String jobRole;
     private String interviewType; // HR, Technical
@@ -28,6 +30,8 @@ public class Interview {
     private String status; // Scheduled, Completed, Cancelled
 
     private String meetingLink;
+    private String location;
+    private String address;
     private String interviewerName;
 
     private String feedback;
@@ -55,6 +59,22 @@ public class Interview {
 
     public void setCompanyId(Long companyId) {
         this.companyId = companyId;
+    }
+
+    public Long getJobId() {
+        return jobId;
+    }
+
+    public void setJobId(Long jobId) {
+        this.jobId = jobId;
+    }
+
+    public String getCandidateEmail() {
+        return candidateEmail;
+    }
+
+    public void setCandidateEmail(String candidateEmail) {
+        this.candidateEmail = candidateEmail;
     }
 
     public String getJobRole() {
@@ -103,6 +123,22 @@ public class Interview {
 
     public void setMeetingLink(String meetingLink) {
         this.meetingLink = meetingLink;
+    }
+
+    public String getLocation() {
+        return location;
+    }
+
+    public void setLocation(String location) {
+        this.location = location;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     public String getInterviewerName() {
